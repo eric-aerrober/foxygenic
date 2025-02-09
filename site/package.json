@@ -10,7 +10,6 @@
         "lint": "next lint"
     },
     "dependencies": {
-        "@aerrobert/cloud": "file:../cloud",
         "@aws-sdk/client-dynamodb": "^3.731.1",
         "@aws-sdk/lib-dynamodb": "^3.731.1",
         "@dnd-kit/sortable": "^10.0.0",
