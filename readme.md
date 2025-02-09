@@ -1,4 +1,4 @@
-![Foxygenic Logo](./site/public/logo.png)
+<img src="./site/public/logo.png" alt="Foxygenic Logo" width="200px" height="200px" />
 
 # Foxygenic
 
