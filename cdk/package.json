@@ -1,0 +1,25 @@
+{
+    "name": "cdk",
+    "version": "0.1.0",
+    "bin": {
+        "cdk": "src/cdk.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc -w",
+        "deploy:foxygen": "cdk deploy --profile foxygen"
+    },
+    "devDependencies": {
+        "@types/node": "22.5.4",
+        "aws-cdk": "2.162.1",
+        "ts-node": "^10.9.2",
+        "typescript": "~5.6.2"
+    },
+    "dependencies": {
+        "@aws-sdk/client-dynamodb": "^3.699.0",
+        "@aws-sdk/lib-dynamodb": "^3.699.0",
+        "aws-cdk-lib": "^2.171.0",
+        "constructs": "10.0.0",
+        "source-map-support": "^0.5.21"
+    }
+}
