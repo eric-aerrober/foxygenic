@@ -16,6 +16,14 @@ export default function AboutPage() {
                         Foxygen is built by developers, for developers. We believe in making Salesforce package management simple and efficient. Join us in
                         improving the Salesforce development experience.
                     </p>
+                    <br />
+                    <p className="text-gray-600">
+                        Want to contribute? Check out our{" "}
+                        <a href="https://github.com/eric-aerrober/foxygenic" className="text-blue-500 hover:underline">
+                            GitHub repository
+                        </a>{" "}
+                        and help us make Foxygen even better!
+                    </p>
                 </section>
 
                 <section>
