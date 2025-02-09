@@ -1,3 +1,5 @@
+![Foxygenic Logo](./site/public/logo.png)
+
 # Foxygenic
 
 Foxygenic is a full-stack project that combines a modern Next.js front-end with AWS cloud infrastructure managed by the AWS Cloud Development Kit (CDK). The repository is organized into two main parts: one for cloud resources and one for the site.
