@@ -37,20 +37,31 @@ export default function Repository({ repository }: RepositoryProps) {
                 <div className="flex justify-between items-center">
                     <div className="flex items-center min-w-0 gap-2">
                         <h3 className="text-lg font-medium lowercase truncate">{repository.repoName}</h3>
-                        <a
-                            href={repository.repoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-500"
-                            title="Open repository"
-                        >
-                            <ExternalLink size={20} />
-                        </a>
+                        <div className="flex items-center gap-2">
+                            <a
+                                href={repository.repoUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-gray-500"
+                                title="Open repository"
+                            >
+                                <ExternalLink size={20} />
+                            </a>
+                            {repository.latestPackageVersionId && (
+                                <button 
+                                    className="text-blue-500 md:hidden"
+                                    onClick={() => setShowInstallCommand(true)}
+                                    title="Show install command"
+                                >
+                                    <Download size={20} />
+                                </button>
+                            )}
+                        </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                         {repository.latestPackageVersionId && (
                             <button 
-                                className="text-blue-500"
+                                className="text-blue-500 hidden md:block"
                                 onClick={() => setShowInstallCommand(true)}
                                 title="Show install command"
                             >
