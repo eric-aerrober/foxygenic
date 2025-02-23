@@ -16,7 +16,7 @@ export interface RepositoryRecord {
     topics: string[];
     userLogo?: string;
     uploadTime: string;
-    sfdxProject?: SfdxProject;
+    latestPackageVersionId?: string;
 }
 
 export interface SfdxProjectConfig {
