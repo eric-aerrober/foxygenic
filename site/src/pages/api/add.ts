@@ -1,16 +1,23 @@
 import { Octokit } from "@octokit/rest";
 import crypto from "crypto";
 import { NextApiRequest, NextApiResponse } from "next";
+import { GithubMetadata, SfdxProject } from "~/types";
 import { putRepository } from "./_resources";
-import { InvalidRepositoryUrlError, NotSalesforceProjectError } from "./errors";
-import { GithubMetadata } from "~/types";
+import { InvalidRepositoryUrlError, NotSalesforceProjectError, PackageNotFoundError } from "./errors";
+
+const SFDX_PROJECT_PATH = "sfdx-project.json";
+
+interface ContentResponse {
+    data: {
+        content: string;
+    };
+}
 
 export default async function (req: NextApiRequest, res: NextApiResponse) {
     try {
         await handle(req.body);
         res.status(200).json({ message: "Repository added successfully" });
     } catch (error) {
-        console.error(error);
         const errorResponse = (() => {
             switch (error?.constructor?.name) {
                 case "InvalidRepositoryUrlError":
@@ -31,7 +38,7 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
 
 async function handle({ githubUrl }: { githubUrl: string }) {
     // Get the repo from github
-    const repositoryData = await getGithubRepoMetdata(githubUrl);
+    const repositoryData = await getGithubRepoMetadata(githubUrl);
 
     // Get the list of files in the repo
     const gitTree = await getGitTree(repositoryData);
@@ -39,11 +46,51 @@ async function handle({ githubUrl }: { githubUrl: string }) {
     // Verify the repo is a Salesforce project
     verifySalesforceRepository(gitTree);
 
+    let latestPackageVersionId: string | undefined;
+    try {
+        latestPackageVersionId = await getSfdxProject(repositoryData);
+    } catch (error) {
+        if (error instanceof PackageNotFoundError) {
+            // nothing to really do here
+        } else {
+            // don't fail, in the future we might log this or something
+        }
+    }
+
     // Save the repo to the database
-    await persistRepository(repositoryData);
+    await persistRepository(repositoryData, latestPackageVersionId);
 }
 
-async function getGithubRepoMetdata(githubUrl: string): Promise<GithubMetadata> {
+async function getSfdxProject(repo: GithubMetadata) {
+    const octokit = new Octokit();
+    let content: string;
+    try {
+        const contentResp = (await octokit.repos.getContent({
+            owner: repo.owner.login,
+            repo: repo.name,
+            path: SFDX_PROJECT_PATH,
+        })) as ContentResponse;
+        content = contentResp.data.content;
+    } catch (error) {
+        throw new PackageNotFoundError();
+    }
+
+    const projectData: SfdxProject = JSON.parse(Buffer.from(content, "base64").toString("utf-8"));
+    if (!projectData.packageAliases) {
+        throw new PackageNotFoundError();
+    }
+
+    // Get the last entry in packageAliases
+    const aliases = Object.entries(projectData.packageAliases);
+    if (aliases.length === 0) {
+        throw new PackageNotFoundError();
+    }
+
+    const [_, packageVersionId] = aliases[aliases.length - 1];
+    return packageVersionId;
+}
+
+async function getGithubRepoMetadata(githubUrl: string): Promise<GithubMetadata> {
     try {
         const octokit = new Octokit();
         const { data } = await octokit.repos.get({
@@ -52,7 +99,6 @@ async function getGithubRepoMetdata(githubUrl: string): Promise<GithubMetadata> 
         });
         return data;
     } catch (error) {
-        console.error(error);
         throw new InvalidRepositoryUrlError();
     }
 }
@@ -70,7 +116,7 @@ async function getGitTree(repo: GithubMetadata) {
 }
 
 function verifySalesforceRepository(paths: string[]) {
-    const salesforcePaths = [".forceignore", "sfdx-project.json", "package.xml", "classes/", "triggers/", "aura/", "lwc/", "objects/"];
+    const salesforcePaths = [".forceignore", SFDX_PROJECT_PATH, "package.xml", "classes/", "triggers/", "aura/", "lwc/", "objects/"];
 
     let numberOfIdentifiers = 0;
     for (const gitTreeEntry of paths) {
@@ -86,7 +132,7 @@ function verifySalesforceRepository(paths: string[]) {
     }
 }
 
-async function persistRepository(data: GithubMetadata) {
+async function persistRepository(data: GithubMetadata, latestPackageVersionId: string | undefined) {
     const { stargazers_count, full_name, description, topics } = data;
     const userProfilePicture = data.owner.avatar_url;
     await putRepository({
@@ -98,5 +144,6 @@ async function persistRepository(data: GithubMetadata) {
         uploadTime: new Date().toISOString(),
         userLogo: userProfilePicture,
         topics: topics || [],
+        latestPackageVersionId,
     });
 }

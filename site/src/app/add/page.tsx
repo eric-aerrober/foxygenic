@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { Loading } from "~/components/loading";
 
@@ -28,7 +28,6 @@ export default function RegisterPage() {
                 toast.error(resp.message);
             }
         } catch (error) {
-            console.error(error);
             toast.error("An error occurred");
         } finally {
             setIsLoading(false);

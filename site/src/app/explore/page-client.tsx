@@ -17,7 +17,7 @@ export function PageClient({ repositories }: PageClientProps) {
         .sort((a, b) => (sortOrder === "asc" ? a.stars - b.stars : b.stars - a.stars));
 
     return (
-        <div className="max-w-4xl mx-auto py-8 mx-2">
+        <div className="max-w-4xl py-8 mx-auto">
             <div className="flex justify-between items-center mb-4 mx-2">
                 <h2 className="text-2xl font-bold">Explore Open Source Salesforce Packages</h2>
             </div>
@@ -32,7 +32,7 @@ export function PageClient({ repositories }: PageClientProps) {
                     />
                     <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                 </div>
-                <div className="flex items-center space-x-2 hidden md:block ">
+                <div className="items-center space-x-2 hidden md:block ">
                     <span className="text-gray-700">Sort by stars:</span>
                     <select
                         value={sortOrder}
@@ -44,7 +44,7 @@ export function PageClient({ repositories }: PageClientProps) {
                     </select>
                 </div>
             </div>
-            <div className="space-y-6  mx-2">
+            <div className="space-y-6 mx-2">
                 {filteredRepositories.map((repo) => (
                     <Repository key={repo.repoId} repository={repo} />
                 ))}
